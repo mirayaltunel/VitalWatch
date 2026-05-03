@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VitalWatch.Api.EFConfiguration;
@@ -11,9 +12,11 @@ using VitalWatch.Api.EFConfiguration;
 namespace VitalWatch.Api.Migrations
 {
     [DbContext(typeof(VitalWatchDbContext))]
-    partial class VitalWatchDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260503183515_patient")]
+    partial class patient
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,10 +60,6 @@ namespace VitalWatch.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<string>("PatientShareCode")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int?>("UpdatedById")
                         .HasColumnType("integer");

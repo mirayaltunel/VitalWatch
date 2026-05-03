@@ -9,6 +9,7 @@ namespace VitalWatch.Api.EFConfiguration
         { 
         }
         public DbSet<User> Users { get; set; }
+        public DbSet<Patient> Patients { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +41,25 @@ namespace VitalWatch.Api.EFConfiguration
                 entity.Property(u => u.PasswordHash).IsRequired();
                 entity.Property(u => u.Salt).IsRequired();
             });
+
+            modelBuilder.Entity<Patient>(entity =>
+            {
+                entity.Property(u => u.FirstName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(u => u.LastName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+
+                entity.Property(u => u.BirthDate)
+                    .IsRequired(true);
+
+                entity.Property(u => u.Gender)
+                    .IsRequired(true);
+            });
+
         }
     }
 }
