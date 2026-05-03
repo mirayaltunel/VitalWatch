@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VitalWatch.Api.Entities;
 
 namespace VitalWatch.Api.EFConfiguration
@@ -10,7 +10,15 @@ namespace VitalWatch.Api.EFConfiguration
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Patient> Patients { get; set; }
-
+        public DbSet<UserPatient> UserPatients { get; set; }
+        public DbSet<Disease> Diseases { get; set; }
+        public DbSet<PatientDisease> PatientDiseases { get; set; }
+        public DbSet<Device> Devices { get; set; }
+        public DbSet<Sensor> Sensors { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<HealthEvent> HealthEvents { get; set; }
+        public DbSet<SensorMeasurement> SensorMeasurements { get; set; }
+        public DbSet<SeizureEvent> SeizureEvents { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>(entity =>
@@ -58,6 +66,35 @@ namespace VitalWatch.Api.EFConfiguration
 
                 entity.Property(u => u.Gender)
                     .IsRequired(true);
+            });
+
+            modelBuilder.Entity<UserPatient>(entity =>
+            {
+                entity.HasOne(up => up.User)
+                      .WithMany()
+                      .HasForeignKey(up => up.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(up => up.Patient)
+                      .WithMany()
+                      .HasForeignKey(up => up.PatientId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<SensorMeasurement>(entity =>
+            {
+                entity.HasOne(sm => sm.HealthEvent)
+                      .WithMany()
+                      .HasForeignKey(sm => sm.HealthEventId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasOne(n => n.User)
+                      .WithMany()
+                      .HasForeignKey(n => n.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
         }
