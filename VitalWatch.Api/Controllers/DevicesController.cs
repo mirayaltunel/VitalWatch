@@ -13,5 +13,12 @@ namespace VitalWatch.Api.Controllers
         {
             _deviceService = deviceService;
         }
+
+        [HttpGet("Patient/{patientId}")]
+        public async Task<IActionResult> GetPatientDevices(int patientId)
+        {
+            var resp = await _deviceService.GetPatientDevices(patientId);
+            return HandleResponse(resp);
+        }
     }
 }

@@ -13,5 +13,19 @@ namespace VitalWatch.Api.Controllers
         {
             _healthEventService = healthEventService;
         }
+
+        [HttpGet("Patient/{patientId}/Alerts")]
+        public async Task<IActionResult> GetLatestAlerts(int patientId)
+        {
+            var resp = await _healthEventService.GetLatestAlerts(patientId);
+            return HandleResponse(resp);
+        }
+
+        [HttpGet("Patient/{patientId}/Reports")]
+        public async Task<IActionResult> GetPatientReports(int patientId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            var resp = await _healthEventService.GetPatientReports(patientId, startDate, endDate);
+            return HandleResponse(resp);
+        }
     }
 }

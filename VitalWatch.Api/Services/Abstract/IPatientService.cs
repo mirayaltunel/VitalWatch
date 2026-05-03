@@ -1,6 +1,8 @@
-﻿namespace VitalWatch.Api.Services.Abstract
+namespace VitalWatch.Api.Services.Abstract
 {
     public interface IPatientService
     {
+        Task<ResponseManage.ResponseModel> AddPatient(Models.Requests.AddPatientRequestModel request, int caregiverUserId);
+        Task<ResponseManage.ResponseModel<List<Models.Responses.PatientListDto>>> GetMyPatients(int userId);
     }
 }

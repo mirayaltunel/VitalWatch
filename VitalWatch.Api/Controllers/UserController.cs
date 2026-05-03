@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VitalWatch.Api.Models.Requests;
 using VitalWatch.Api.Services.Abstract;
@@ -19,6 +19,13 @@ namespace VitalWatch.Api.Controllers
         public async Task<IActionResult>Register ([FromBody] RegisterRequestModel model)
         {
             var resp = await _userService.Register(model);
+            return HandleResponse(resp);
+        }
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login ([FromBody] LoginRequestModel model)
+        {
+            var resp = await _userService.Login(model);
             return HandleResponse(resp);
         }
     }

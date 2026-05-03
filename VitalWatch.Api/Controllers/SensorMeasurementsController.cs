@@ -13,5 +13,19 @@ namespace VitalWatch.Api.Controllers
         {
             _sensorMeasurementService = sensorMeasurementService;
         }
+
+        [HttpGet("Patient/{patientId}/Latest")]
+        public async Task<IActionResult> GetLatestVitals(int patientId)
+        {
+            var resp = await _sensorMeasurementService.GetLatestVitals(patientId);
+            return HandleResponse(resp);
+        }
+
+        [HttpGet("Patient/{patientId}/History")]
+        public async Task<IActionResult> GetVitalHistory(int patientId, [FromQuery] VitalWatch.Api.Enums.MeasurementType type)
+        {
+            var resp = await _sensorMeasurementService.GetVitalHistory(patientId, type);
+            return HandleResponse(resp);
+        }
     }
 }

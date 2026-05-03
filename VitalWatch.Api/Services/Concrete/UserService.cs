@@ -1,4 +1,5 @@
-﻿using VitalWatch.Api.EFConfiguration;
+using Microsoft.EntityFrameworkCore;
+using VitalWatch.Api.EFConfiguration;
 using VitalWatch.Api.Entities;
 using VitalWatch.Api.Helpers;
 using VitalWatch.Api.Models.Requests;
@@ -36,6 +37,19 @@ namespace VitalWatch.Api.Services.Concrete
             await _dbContext.SaveChangesAsync();
 
             return ResponseManager.CreateSuccess();
+        }
+
+        public async Task<ResponseModel<int>> Login(LoginRequestModel requestModel)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == requestModel.Email);
+            if (user == null)
+                return ResponseManager.CreateError<int>("User not found");
+
+            var hash = PasswordHelper.GetHash(requestModel.Password, user.Salt);
+            if (user.PasswordHash != hash)
+                return ResponseManager.CreateError<int>("Invalid password");
+
+            return ResponseManager.CreateSuccess(user.Id);
         }
     }
 }
