@@ -41,7 +41,7 @@ namespace VitalWatch.Api.Services.Concrete
                 Pulse = heartRate?.Value ?? 0,
                 SpO2 = spo2?.Value ?? 0,
                 Respiration = respiration?.Value ?? 0,
-                Timestamp = heartRate?.Timestamp ?? DateTime.Now
+                Timestamp = heartRate?.Timestamp ?? DateTime.UtcNow
             };
 
             return ResponseManager.CreateSuccess(dto);

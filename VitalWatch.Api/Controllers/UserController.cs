@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VitalWatch.Api.Models.Requests;
@@ -15,6 +16,7 @@ namespace VitalWatch.Api.Controllers
             _userService = userService;
         }
 
+        [AllowAnonymous]
         [HttpPost("Register")]
         public async Task<IActionResult>Register ([FromBody] RegisterRequestModel model)
         {
@@ -22,6 +24,7 @@ namespace VitalWatch.Api.Controllers
             return HandleResponse(resp);
         }
 
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<IActionResult> Login ([FromBody] LoginRequestModel model)
         {

@@ -6,6 +6,7 @@ namespace VitalWatch.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BaseController : ControllerBase
     {
         protected IActionResult HandleResponse(ResponseModel responseModel)

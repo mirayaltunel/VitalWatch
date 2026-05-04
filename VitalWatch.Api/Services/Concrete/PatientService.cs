@@ -58,7 +58,7 @@ namespace VitalWatch.Api.Services.Concrete
                 {
                     PatientId = patient.Id,
                     DiseaseId = disease.Id,
-                    DiagnosedAt = DateTime.Now,
+                    DiagnosedAt = DateTime.UtcNow,
                     Severity = Severity.Medium
                 });
             }
@@ -77,7 +77,7 @@ namespace VitalWatch.Api.Services.Concrete
                     Id = up.Patient.Id,
                     FirstName = up.Patient.FirstName,
                     LastName = up.Patient.LastName,
-                    Age = DateTime.Now.Year - up.Patient.BirthDate.Year,
+                    Age = DateTime.UtcNow.Year - up.Patient.BirthDate.Year,
                     DiseaseName = _dbContext.PatientDiseases
                                       .Where(pd => pd.PatientId == up.PatientId)
                                       .Select(pd => pd.Disease.Name)
