@@ -115,7 +115,8 @@ namespace VitalWatch.Api.Services.Concrete
                                       .FirstOrDefault() ?? "Bilinmiyor",
                     IsConnected = _db.Devices.Any(d =>
                         d.PatientId == up.PatientId &&
-                        d.DeviceStatusId == SeedConstants.DeviceStatuses.Active)
+                        d.DeviceStatusId == SeedConstants.DeviceStatuses.Active),
+                    PatientShareCode = up.Patient.PatientShareCode
                 })
                 .ToListAsync();
 

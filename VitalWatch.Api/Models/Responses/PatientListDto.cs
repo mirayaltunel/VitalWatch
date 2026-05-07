@@ -8,5 +8,6 @@ namespace VitalWatch.Api.Models.Responses
         public int Age { get; set; }
         public string DiseaseName { get; set; }
         public bool IsConnected { get; set; }
+        public string PatientShareCode { get; set; }
     }
 }
