@@ -6,92 +6,75 @@ using VitalWatch.Api.Entities;
 using VitalWatch.Api.Hubs;
 using VitalWatch.Api.Models.Requests;
 using VitalWatch.Api.ResponseManage;
+using VitalWatch.Api.Services.Abstract;
 using VitalWatch.Api.Services.Concrete;
 
 namespace VitalWatch.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous] // IoT cihazlar token taşımaz
+    [AllowAnonymous]
     public class SensorDataController : ControllerBase
     {
         private readonly VitalWatchDbContext _db;
-        private readonly IHubContext<VitalHub> _hubContext;
-        private readonly SimulationService _simulation;
+        private readonly IHubContext<VitalHub> _hub;
+        private readonly SimulationService _sim;
+        private readonly IAlertService _alert;
 
-        public SensorDataController(
-            VitalWatchDbContext db,
-            IHubContext<VitalHub> hubContext,
-            SimulationService simulation)
+        public SensorDataController(VitalWatchDbContext db, IHubContext<VitalHub> hub, SimulationService sim, IAlertService alert)
         {
-            _db = db;
-            _hubContext = hubContext;
-            _simulation = simulation;
+            _db = db; _hub = hub; _sim = sim; _alert = alert;
         }
 
-        /// <summary>
-        /// IoT cihazdan veri alır, DB'ye yazar, SignalR ile yayar
-        /// </summary>
         [HttpPost("Ingest")]
-        public async Task<IActionResult> Ingest([FromBody] IngestDataRequestModel model)
+        public async Task<IActionResult> Ingest([FromBody] IngestDataRequestModel m)
         {
+            var ts = m.Timestamp.Kind == DateTimeKind.Utc ? m.Timestamp : m.Timestamp.ToUniversalTime();
             var measurement = new SensorMeasurement
             {
-                PatientId       = model.PatientId,
-                MeasurementType = model.MeasurementType,
-                DeviceType      = model.DeviceType,
-                Value           = model.Value,
-                Unit            = model.Unit,
-                Timestamp       = model.Timestamp.Kind == DateTimeKind.Utc
-                                    ? model.Timestamp
-                                    : model.Timestamp.ToUniversalTime()
+                PatientId = m.PatientId,
+                DeviceId = m.DeviceId,
+                MeasurementTypeId = m.MeasurementTypeId,
+                Value = m.Value,
+                ValueX = m.ValueX,
+                ValueY = m.ValueY,
+                ValueZ = m.ValueZ,
+                Timestamp = ts
             };
-
             _db.SensorMeasurements.Add(measurement);
             await _db.SaveChangesAsync();
 
-            // Aynı anda o hastayı dinleyen clientlara gönder
-            await _hubContext.Clients
-                .Group($"patient_{model.PatientId}")
-                .SendAsync("VitalUpdate", new
-                {
-                    patientId   = model.PatientId,
-                    measurementType = model.MeasurementType.ToString(),
-                    value       = model.Value,
-                    unit        = model.Unit,
-                    timestamp   = measurement.Timestamp
-                });
+            await _hub.Clients.Group($"patient_{m.PatientId}").SendAsync("VitalUpdate", new
+            {
+                patientId = m.PatientId,
+                measurementTypeId = m.MeasurementTypeId,
+                value = m.Value,
+                timestamp = ts
+            });
+
+            await _alert.EvaluateMeasurement(m.PatientId, m.DeviceId, m.MeasurementTypeId,
+                m.Value, m.ValueX, m.ValueY, m.ValueZ, ts);
 
             return Ok(ResponseManager.CreateSuccess("Veri alındı"));
         }
 
-        /// <summary>
-        /// Simülasyonu başlatır — 2sn'de bir sahte vital üretir
-        /// </summary>
         [HttpPost("Simulation/Start/{patientId}")]
         public IActionResult StartSimulation(int patientId)
         {
-            if (_simulation.IsRunning(patientId))
-                return Ok(ResponseManager.CreateSuccess("Simülasyon zaten çalışıyor"));
-
-            _simulation.Start(patientId);
-            return Ok(ResponseManager.CreateSuccess($"Hasta {patientId} için simülasyon başlatıldı"));
+            if (_sim.IsRunning(patientId)) return Ok(ResponseManager.CreateSuccess("Zaten çalışıyor"));
+            _sim.Start(patientId);
+            return Ok(ResponseManager.CreateSuccess($"Hasta {patientId} simülasyonu başladı"));
         }
 
-        /// <summary>
-        /// Simülasyonu durdurur
-        /// </summary>
         [HttpPost("Simulation/Stop/{patientId}")]
         public IActionResult StopSimulation(int patientId)
         {
-            _simulation.Stop(patientId);
-            return Ok(ResponseManager.CreateSuccess($"Hasta {patientId} için simülasyon durduruldu"));
+            _sim.Stop(patientId);
+            return Ok(ResponseManager.CreateSuccess($"Hasta {patientId} simülasyonu durdu"));
         }
 
         [HttpGet("Simulation/Status/{patientId}")]
-        public IActionResult SimulationStatus(int patientId)
-        {
-            return Ok(ResponseManager.CreateSuccess(new { isRunning = _simulation.IsRunning(patientId) }));
-        }
+        public IActionResult Status(int patientId)
+            => Ok(ResponseManager.CreateSuccess(new { isRunning = _sim.IsRunning(patientId) }));
     }
 }

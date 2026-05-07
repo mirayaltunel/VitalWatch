@@ -1,4 +1,4 @@
-﻿namespace VitalWatch.Api.Models.Requests
+namespace VitalWatch.Api.Models.Requests
 {
     public class RegisterRequestModel
     {
@@ -8,5 +8,8 @@
         public string Password { get; set; }
         public string PasswordRepeat { get; set; }
         public string? Phone { get; set; }
+
+        /// <summary>1=Caregiver, 2=Relative</summary>
+        public int RoleId { get; set; } = 1;
     }
 }

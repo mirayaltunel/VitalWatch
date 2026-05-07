@@ -1,5 +1,3 @@
-using VitalWatch.Api.Enums;
-
 namespace VitalWatch.Api.Entities
 {
     public class UserPatient : BaseEntity
@@ -10,6 +8,7 @@ namespace VitalWatch.Api.Entities
         public int PatientId { get; set; }
         public Patient Patient { get; set; }
 
+        public int RelationshipTypeId { get; set; }
         public RelationshipType RelationshipType { get; set; }
     }
 }

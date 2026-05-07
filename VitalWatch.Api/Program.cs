@@ -17,11 +17,10 @@ builder.Services.AddScoped<ISensorMeasurementService, SensorMeasurementService>(
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IDiseaseService, DiseaseService>();
 builder.Services.AddScoped<IHealthEventService, HealthEventService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IPatientDiseaseService, PatientDiseaseService>();
-builder.Services.AddScoped<ISeizureEventService, SeizureEventService>();
-builder.Services.AddScoped<ISensorService, SensorService>();
 builder.Services.AddScoped<IUserPatientService, UserPatientService>();
+builder.Services.AddScoped<IAlertService, AlertService>();
+builder.Services.AddScoped<IThresholdService, ThresholdService>();
 builder.Services.AddSingleton<SimulationService>();
 builder.Services.AddSignalR();
 

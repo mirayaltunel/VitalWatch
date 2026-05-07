@@ -1,14 +1,14 @@
-using VitalWatch.Api.Enums;
-
 namespace VitalWatch.Api.Models.Requests
 {
     public class IngestDataRequestModel
     {
         public int PatientId { get; set; }
-        public MeasurementType MeasurementType { get; set; }
-        public DeviceType DeviceType { get; set; }
+        public int DeviceId { get; set; }
+        public int MeasurementTypeId { get; set; }
         public double Value { get; set; }
-        public string Unit { get; set; }
+        public double? ValueX { get; set; }
+        public double? ValueY { get; set; }
+        public double? ValueZ { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

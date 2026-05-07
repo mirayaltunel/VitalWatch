@@ -35,5 +35,12 @@ namespace VitalWatch.Api.Controllers
             var resp = await _patientService.VerifyPatientCode(code, userId);
             return HandleResponse(resp);
         }
+
+        [HttpGet("{patientId}/ShareCode")]
+        public async Task<IActionResult> GetShareCode(int patientId, [FromQuery] int userId)
+        {
+            var resp = await _patientService.GetPatientShareCode(patientId, userId);
+            return HandleResponse(resp);
+        }
     }
 }

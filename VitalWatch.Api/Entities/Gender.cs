@@ -1,0 +1,7 @@
+namespace VitalWatch.Api.Entities
+{
+    public class Gender : BaseEntity
+    {
+        public string Name { get; set; }
+    }
+}

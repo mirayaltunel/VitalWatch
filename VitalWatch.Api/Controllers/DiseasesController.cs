@@ -7,11 +7,10 @@ namespace VitalWatch.Api.Controllers
     [ApiController]
     public class DiseasesController : BaseController
     {
-        private readonly IDiseaseService _diseaseService;
+        private readonly IDiseaseService _service;
+        public DiseasesController(IDiseaseService service) { _service = service; }
 
-        public DiseasesController(IDiseaseService diseaseService)
-        {
-            _diseaseService = diseaseService;
-        }
+        [HttpGet]
+        public async Task<IActionResult> GetAll() => HandleResponse(await _service.GetAll());
     }
 }

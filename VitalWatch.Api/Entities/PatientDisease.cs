@@ -1,6 +1,3 @@
-using System;
-using VitalWatch.Api.Enums;
-
 namespace VitalWatch.Api.Entities
 {
     public class PatientDisease : BaseEntity
@@ -12,6 +9,5 @@ namespace VitalWatch.Api.Entities
         public Disease Disease { get; set; }
 
         public DateTime DiagnosedAt { get; set; }
-        public Severity Severity { get; set; }
     }
 }

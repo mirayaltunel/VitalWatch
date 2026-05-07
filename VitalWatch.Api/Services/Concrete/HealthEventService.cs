@@ -1,10 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using VitalWatch.Api.Enums;
 using VitalWatch.Api.EFConfiguration;
+using VitalWatch.Api.Helpers;
 using VitalWatch.Api.Models.Responses;
 using VitalWatch.Api.ResponseManage;
 using VitalWatch.Api.Services.Abstract;
@@ -13,52 +9,62 @@ namespace VitalWatch.Api.Services.Concrete
 {
     public class HealthEventService : IHealthEventService
     {
-        private readonly VitalWatchDbContext _dbContext;
+        private readonly VitalWatchDbContext _db;
 
-        public HealthEventService(VitalWatchDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public HealthEventService(VitalWatchDbContext db) { _db = db; }
 
         public async Task<ResponseModel<List<AlertDto>>> GetLatestAlerts(int patientId)
         {
-            var alerts = await _dbContext.HealthEvents
-                .Where(he => he.PatientId == patientId)
-                .OrderByDescending(he => he.Timestamp)
+            var alerts = await _db.Alerts
+                .Include(a => a.MeasurementType)
+                .Include(a => a.Severity)
+                .Where(a => a.PatientId == patientId)
+                .OrderByDescending(a => a.CreatedDate)
                 .Take(5)
-                .Select(he => new AlertDto
+                .Select(a => new AlertDto
                 {
-                    Type = he.EventType.ToString(),
-                    Message = he.EventType.ToString() + " tespit edildi. (" + he.Value + " " + he.Unit + ")",
-                    Severity = he.Severity.ToString(),
-                    Time = he.Timestamp
+                    Id = a.Id,
+                    PatientId = a.PatientId,
+                    MeasurementType = a.MeasurementType.Name,
+                    Severity = a.Severity.Name,
+                    Value = a.Value,
+                    ThresholdMin = a.ThresholdMinSnapshot,
+                    ThresholdMax = a.ThresholdMaxSnapshot,
+                    IsReviewed = a.IsReviewed,
+                    CreatedAt = a.CreatedDate,
+                    Message = a.MeasurementType.Name + " ihlali (" + a.Value + " " + a.MeasurementType.Unit + ")"
                 }).ToListAsync();
-                
+
             return ResponseManager.CreateSuccess(alerts);
         }
 
         public async Task<ResponseModel<ReportSummaryDto>> GetPatientReports(int patientId, DateTime startDate, DateTime endDate)
         {
-            var events = await _dbContext.HealthEvents
-                .Where(he => he.PatientId == patientId && he.Timestamp >= startDate && he.Timestamp <= endDate)
-                .OrderByDescending(he => he.Timestamp)
+            var startUtc = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+            var endUtc = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
+
+            var events = await _db.HealthEvents
+                .Include(e => e.EventType)
+                .Include(e => e.Severity)
+                .Where(e => e.PatientId == patientId && e.StartTimestamp >= startUtc && e.StartTimestamp <= endUtc)
+                .OrderByDescending(e => e.StartTimestamp)
                 .ToListAsync();
 
-            var criticalCount = events.Count(e => e.Severity == Severity.Critical);
-            var warningCount = events.Count(e => e.Severity == Severity.High || e.Severity == Severity.Medium);
-
-            var eventDtos = events.Select(e => new EventDto
-            {
-                Title = e.EventType.ToString().ToUpper(),
-                Description = $"{e.Value} {e.Unit} - {e.Severity} seviyesinde durum algılandı.",
-                Time = e.Timestamp
-            }).ToList();
+            var critical = events.Count(e => e.SeverityId == SeedConstants.Severities.Critical);
+            var warning = events.Count(e => e.SeverityId == SeedConstants.Severities.High || e.SeverityId == SeedConstants.Severities.Medium);
 
             var dto = new ReportSummaryDto
             {
-                CriticalCount = criticalCount,
-                WarningCount = warningCount,
-                Events = eventDtos
+                CriticalCount = critical,
+                WarningCount = warning,
+                Events = events.Select(e => new EventDto
+                {
+                    Id = e.Id,
+                    Title = e.EventType.Name,
+                    Description = $"{e.EventType.Name} ({e.Severity.Name}) - değer: {e.Value}",
+                    Severity = e.Severity.Name,
+                    Time = e.StartTimestamp
+                }).ToList()
             };
 
             return ResponseManager.CreateSuccess(dto);

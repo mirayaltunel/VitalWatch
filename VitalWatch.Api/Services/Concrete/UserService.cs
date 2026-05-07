@@ -11,52 +11,53 @@ namespace VitalWatch.Api.Services.Concrete
 {
     public class UserService : IUserService
     {
-        private readonly VitalWatchDbContext _dbContext;
+        private readonly VitalWatchDbContext _db;
         private readonly IConfiguration _configuration;
 
-        public UserService(VitalWatchDbContext dbContext, IConfiguration configuration)
+        public UserService(VitalWatchDbContext db, IConfiguration configuration)
         {
-            _dbContext = dbContext;
+            _db = db;
             _configuration = configuration;
         }
 
-        public async Task<ResponseModel> Register(RegisterRequestModel requestModel)
+        public async Task<ResponseModel> Register(RegisterRequestModel m)
         {
-            if (requestModel.Password != requestModel.PasswordRepeat)
+            if (m.Password != m.PasswordRepeat)
                 return ResponseManager.CreateError("Şifreler eşleşmiyor");
 
-            var emailNormalized = requestModel.Email.ToLower().Trim();
-            var emailExists = await _dbContext.Users.AnyAsync(u => u.Email == emailNormalized);
-            if (emailExists)
+            var email = m.Email.ToLower().Trim();
+            if (await _db.Users.AnyAsync(u => u.Email == email))
                 return ResponseManager.CreateError("Bu e-posta zaten kayıtlı");
 
+            var roleId = (m.RoleId == SeedConstants.Roles.Caregiver || m.RoleId == SeedConstants.Roles.Relative)
+                ? m.RoleId
+                : SeedConstants.Roles.Caregiver;
+
             var salt = PasswordHelper.GenerateSalt();
-            var hash = PasswordHelper.GetHash(requestModel.Password, salt);
             var user = new User
             {
-                FirstName = requestModel.FirstName,
-                LastName = requestModel.LastName,
-                Email = emailNormalized,
+                FirstName = m.FirstName,
+                LastName = m.LastName,
+                Email = email,
                 Salt = salt,
-                PasswordHash = hash,
-                Phone = requestModel.Phone?.Trim(),
+                PasswordHash = PasswordHelper.GetHash(m.Password, salt),
+                Phone = m.Phone?.Trim(),
+                RoleId = roleId
             };
 
-            _dbContext.Users.Add(user);
-            await _dbContext.SaveChangesAsync();
-
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
             return ResponseManager.CreateSuccess();
         }
 
-        public async Task<ResponseModel<LoginResponseDto>> Login(LoginRequestModel requestModel)
+        public async Task<ResponseModel<LoginResponseDto>> Login(LoginRequestModel m)
         {
-            var emailNormalized = requestModel.Email.ToLower().Trim();
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == emailNormalized);
+            var email = m.Email.ToLower().Trim();
+            var user = await _db.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
                 return ResponseManager.CreateError<LoginResponseDto>("Kullanıcı bulunamadı");
 
-            var hash = PasswordHelper.GetHash(requestModel.Password, user.Salt);
-            if (user.PasswordHash != hash)
+            if (user.PasswordHash != PasswordHelper.GetHash(m.Password, user.Salt))
                 return ResponseManager.CreateError<LoginResponseDto>("Şifre hatalı");
 
             var token = JwtHelper.GenerateToken(user, _configuration);
@@ -65,7 +66,8 @@ namespace VitalWatch.Api.Services.Concrete
             {
                 UserId = user.Id,
                 Token = token,
-                FullName = $"{user.FirstName} {user.LastName}"
+                FullName = $"{user.FirstName} {user.LastName}",
+                Role = user.Role?.Name ?? "Caregiver"
             });
         }
     }

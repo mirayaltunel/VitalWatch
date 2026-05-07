@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VitalWatch.Api.EFConfiguration;
@@ -11,9 +12,11 @@ using VitalWatch.Api.EFConfiguration;
 namespace VitalWatch.Api.Migrations
 {
     [DbContext(typeof(VitalWatchDbContext))]
-    partial class VitalWatchDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507193702_normalized-schema")]
+    partial class normalizedschema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -183,7 +186,7 @@ namespace VitalWatch.Api.Migrations
                     b.Property<DateTime?>("LastSeenAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("PatientId")
+                    b.Property<int>("PatientId")
                         .HasColumnType("integer");
 
                     b.Property<int?>("UpdatedById")
@@ -192,9 +195,6 @@ namespace VitalWatch.Api.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DeviceStatusId");
@@ -202,8 +202,6 @@ namespace VitalWatch.Api.Migrations
                     b.HasIndex("DeviceTypeId");
 
                     b.HasIndex("PatientId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Devices");
                 });
@@ -371,96 +369,6 @@ namespace VitalWatch.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Diseases");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Epilepsi"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "KOAH"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Diyabet"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Hipertansiyon"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Alzheimer"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Parkinson"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Astım"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Kalp Yetmezliği"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Demans"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Felç"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Diğer"
-                        });
                 });
 
             modelBuilder.Entity("VitalWatch.Api.Entities.EventType", b =>
@@ -1508,20 +1416,14 @@ namespace VitalWatch.Api.Migrations
                     b.HasOne("VitalWatch.Api.Entities.Patient", "Patient")
                         .WithMany()
                         .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("VitalWatch.Api.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("DeviceStatus");
 
                     b.Navigation("DeviceType");
 
                     b.Navigation("Patient");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("VitalWatch.Api.Entities.HealthEvent", b =>
