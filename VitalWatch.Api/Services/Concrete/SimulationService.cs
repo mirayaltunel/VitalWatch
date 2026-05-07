@@ -27,7 +27,26 @@ namespace VitalWatch.Api.Services.Concrete
             if (_running.ContainsKey(patientId)) return;
             var cts = new CancellationTokenSource();
             _running[patientId] = cts;
-            Task.Run(() => RunSimulation(patientId, cts.Token));
+            Task.Run(async () =>
+            {
+                await ClearPatientLogs(patientId);
+                await RunSimulation(patientId, cts.Token);
+            });
+        }
+
+        private async Task ClearPatientLogs(int patientId)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<VitalWatchDbContext>();
+
+            db.SensorMeasurements.RemoveRange(
+                db.SensorMeasurements.Where(m => m.PatientId == patientId));
+            db.Alerts.RemoveRange(
+                db.Alerts.Where(a => a.PatientId == patientId));
+            db.HealthEvents.RemoveRange(
+                db.HealthEvents.Where(e => e.PatientId == patientId));
+
+            await db.SaveChangesAsync();
         }
 
         public void Stop(int patientId)
