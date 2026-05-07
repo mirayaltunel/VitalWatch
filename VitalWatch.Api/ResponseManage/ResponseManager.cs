@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 
 namespace VitalWatch.Api.ResponseManage
 {
@@ -19,7 +19,7 @@ namespace VitalWatch.Api.ResponseManage
             return new ResponseModel<T>
             {
                 Message = message,
-                StatusCode = HttpStatusCode.BadRequest
+                StatusCode = HttpStatusCode.OK
             };
         }
 

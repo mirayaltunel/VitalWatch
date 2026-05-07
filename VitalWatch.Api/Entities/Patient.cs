@@ -1,4 +1,4 @@
-﻿namespace VitalWatch.Api.Entities
+namespace VitalWatch.Api.Entities
 {
     public class Patient : BaseEntity
     {
