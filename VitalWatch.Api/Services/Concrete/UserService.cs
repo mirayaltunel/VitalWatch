@@ -25,7 +25,8 @@ namespace VitalWatch.Api.Services.Concrete
             if (requestModel.Password != requestModel.PasswordRepeat)
                 return ResponseManager.CreateError("Şifreler eşleşmiyor");
 
-            var emailExists = await _dbContext.Users.AnyAsync(u => u.Email == requestModel.Email);
+            var emailNormalized = requestModel.Email.ToLower().Trim();
+            var emailExists = await _dbContext.Users.AnyAsync(u => u.Email == emailNormalized);
             if (emailExists)
                 return ResponseManager.CreateError("Bu e-posta zaten kayıtlı");
 
@@ -35,10 +36,10 @@ namespace VitalWatch.Api.Services.Concrete
             {
                 FirstName = requestModel.FirstName,
                 LastName = requestModel.LastName,
-                Email = requestModel.Email,
+                Email = emailNormalized,
                 Salt = salt,
                 PasswordHash = hash,
-                Phone = requestModel.Phone,
+                Phone = requestModel.Phone?.Trim(),
             };
 
             _dbContext.Users.Add(user);
@@ -49,7 +50,8 @@ namespace VitalWatch.Api.Services.Concrete
 
         public async Task<ResponseModel<LoginResponseDto>> Login(LoginRequestModel requestModel)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == requestModel.Email);
+            var emailNormalized = requestModel.Email.ToLower().Trim();
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == emailNormalized);
             if (user == null)
                 return ResponseManager.CreateError<LoginResponseDto>("Kullanıcı bulunamadı");
 

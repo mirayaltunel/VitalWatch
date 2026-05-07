@@ -4,5 +4,6 @@ namespace VitalWatch.Api.Services.Abstract
     {
         Task<ResponseManage.ResponseModel> AddPatient(Models.Requests.AddPatientRequestModel request, int caregiverUserId);
         Task<ResponseManage.ResponseModel<List<Models.Responses.PatientListDto>>> GetMyPatients(int userId);
+        Task<ResponseManage.ResponseModel<int?>> VerifyPatientCode(string code, int userId);
     }
 }

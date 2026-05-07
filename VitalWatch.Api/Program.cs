@@ -86,4 +86,4 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<VitalHub>("/hubs/vital");
 
-app.Run();
+app.Run("http://0.0.0.0:5000");
