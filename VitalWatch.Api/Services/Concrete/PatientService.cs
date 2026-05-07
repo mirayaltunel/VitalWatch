@@ -61,6 +61,17 @@ namespace VitalWatch.Api.Services.Concrete
                     });
                 }
 
+                // Hasta için tek bir Hasta Ünitesi cihazı oluştur (tüm ölçümler buradan akar)
+                _db.Devices.Add(new Device
+                {
+                    PatientId = patient.Id,
+                    DeviceName = $"{patient.FirstName} Hasta Ünitesi",
+                    DeviceTypeId = SeedConstants.DeviceTypes.PatientUnit,
+                    DeviceStatusId = SeedConstants.DeviceStatuses.Active,
+                    BatteryLevel = null, // prize takılı
+                    LastSeenAt = DateTime.UtcNow
+                });
+
                 await _db.SaveChangesAsync();
 
                 // Hasta için varsayılan threshold'ları oluştur

@@ -47,6 +47,22 @@ namespace VitalWatch.Api.Services.Concrete
 
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
+
+            // Bakıcı ise otomatik bileklik cihazı oluştur (buzzer/alarm)
+            if (roleId == SeedConstants.Roles.Caregiver)
+            {
+                _db.Devices.Add(new Entities.Device
+                {
+                    UserId = user.Id,
+                    DeviceName = $"{user.FirstName} Bilekliği",
+                    DeviceTypeId = SeedConstants.DeviceTypes.SmartWatch,
+                    DeviceStatusId = SeedConstants.DeviceStatuses.Active,
+                    BatteryLevel = 100,
+                    LastSeenAt = DateTime.UtcNow
+                });
+                await _db.SaveChangesAsync();
+            }
+
             return ResponseManager.CreateSuccess();
         }
 

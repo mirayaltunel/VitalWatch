@@ -64,21 +64,26 @@ namespace VitalWatch.Api.Services.Concrete
             double pulse = 75, spo2 = 97, respiration = 16;
             int tick = 0;
 
-            // Hasta için bir cihaz garantile
+            // Hastaya ait Hasta Ünitesi cihazını bul (hasta yaratılırken otomatik oluşturuldu)
             int deviceId;
             using (var scope = _scopeFactory.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<VitalWatchDbContext>();
-                var device = await db.Devices.FirstOrDefaultAsync(d => d.PatientId == patientId, ct);
+                var device = await db.Devices.FirstOrDefaultAsync(
+                    d => d.PatientId == patientId &&
+                         d.DeviceTypeId == SeedConstants.DeviceTypes.PatientUnit &&
+                         !d.IsDeleted, ct);
+
                 if (device == null)
                 {
+                    // Eski hastalar için fallback: ünitesi yoksa bir tane yarat
                     device = new Device
                     {
                         PatientId = patientId,
-                        DeviceName = "Simülasyon Bilekliği",
-                        DeviceTypeId = SeedConstants.DeviceTypes.SmartWatch,
+                        DeviceName = "Hasta Ünitesi",
+                        DeviceTypeId = SeedConstants.DeviceTypes.PatientUnit,
                         DeviceStatusId = SeedConstants.DeviceStatuses.Active,
-                        BatteryLevel = 95,
+                        BatteryLevel = null,
                         LastSeenAt = DateTime.UtcNow
                     };
                     db.Devices.Add(device);
