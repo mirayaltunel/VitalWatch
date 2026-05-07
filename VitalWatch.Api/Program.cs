@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using VitalWatch.Api.EFConfiguration;
+using VitalWatch.Api.Hubs;
 using VitalWatch.Api.Services.Abstract;
 using VitalWatch.Api.Services.Concrete;
 
@@ -21,6 +22,8 @@ builder.Services.AddScoped<IPatientDiseaseService, PatientDiseaseService>();
 builder.Services.AddScoped<ISeizureEventService, SeizureEventService>();
 builder.Services.AddScoped<ISensorService, SensorService>();
 builder.Services.AddScoped<IUserPatientService, UserPatientService>();
+builder.Services.AddSingleton<SimulationService>();
+builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -71,11 +74,16 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.UseCors(x => x
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
+
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<VitalHub>("/hubs/vital");
 
 app.Run();
