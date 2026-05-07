@@ -283,7 +283,7 @@ POST /api/SensorData/Simulation/Start/{patientId}
 ## 5. Demo Akışı (Hocaya Sunum)
 
 1. Backend'i başlat: `dotnet run` (port 5000)
-2. Mobil cihazda login (Mehmet / 123456)
+2. Mobil cihazda login (`altunelmiray31@gmail.com` / `miray123`)
 3. Hastalar listesinde Ayşe seç → Dashboard
 4. Sağ üst Simülasyon Başlat → 2 sn'de canlı vitaller akmaya başlar
 5. ~12 sn içinde nöbet → Dashboard'da kritik alarmı + bileklikte buzzer
@@ -307,7 +307,7 @@ JOIN "UserPatients" up ON up."UserId" = u."Id"
 JOIN "Patients" p ON p."Id" = up."PatientId"
 LEFT JOIN "PatientDiseases" pd ON pd."PatientId" = p."Id"
 LEFT JOIN "Diseases" d ON d."Id" = pd."DiseaseId"
-WHERE u."Email" = 'mmt.altnl@gmail.com';
+WHERE u."Email" = 'altunelmiray31@gmail.com';
 ```
 
 ### 6.2 Hastaların yaş ortalaması (cinsiyete göre)
